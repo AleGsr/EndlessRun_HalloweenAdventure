@@ -8,11 +8,18 @@ public class Movement : MonoBehaviour
     public float sideSpeed = 2f;
     public float startDelay = 5f;   
     public float deathDelay = 5f;   
-    public TextMeshProUGUI countdownText; 
+    public TextMeshProUGUI countdownText;
+
+    public float horizontalSpeed = 3;
+    public float rightLimit = 2f;
+    public float leftLimit = -2f;
 
     private bool isGameActive = false;
     private Animator animator;
     private float countdownTimer;
+
+    public GameObject goPanel;
+
 
     void Start()
     {
@@ -44,8 +51,25 @@ public class Movement : MonoBehaviour
         else
         {
             // Mueve al personaje hacia adelante
-            transform.Translate(Vector3.forward * playerSpeed * Time.deltaTime);
-                    MovLateral();
+            transform.Translate(Vector3.forward * Time.deltaTime * playerSpeed, Space.World);
+
+            if (Input.touchCount > 0)
+            {
+                Touch touch = Input.GetTouch(0);
+
+                if (touch.phase == TouchPhase.Began)
+                {
+                    // Si tocó en la mitad izquierda de la pantalla
+                    if (touch.position.x < Screen.width / 2)
+                    {
+                        MoveLeft();
+                    }
+                    else // Mitad derecha
+                    {
+                        MoveRight();
+                    }
+                }
+            }
         }
     }
 
@@ -60,18 +84,21 @@ public class Movement : MonoBehaviour
 
     }
 
-    void MovLateral()
-    {
-        if (Input.GetKey(KeyCode.A))
-        {
-            transform.Translate(Vector3.left * sideSpeed * Time.deltaTime);
-        }
 
-        if (Input.GetKey(KeyCode.D))
-        {
-            transform.Translate(Vector3.right * sideSpeed * Time.deltaTime);
-        }
+    void MoveLeft()
+    {
+        Debug.Log("Touch Left");
+        if (transform.position.x > leftLimit)
+            transform.Translate(Vector3.left * Time.deltaTime * horizontalSpeed);
     }
+
+    void MoveRight()
+    {
+        Debug.Log("Touch Right");
+        if (transform.position.x < rightLimit)
+            transform.Translate(Vector3.right * Time.deltaTime * horizontalSpeed);
+    }
+
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -92,6 +119,6 @@ public class Movement : MonoBehaviour
 
     void GoToGameOver()
     {
-        SceneManager.LoadScene("GameOver");
+        goPanel.gameObject.SetActive(true);
     }
 }
